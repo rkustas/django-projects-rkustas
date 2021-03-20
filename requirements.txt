@@ -1,0 +1,10 @@
+asgiref==3.3.1
+certifi==2020.12.5
+decouple==0.0.7
+dj-database-url==0.5.0
+Django==3.1.7
+django-widget-tweaks==1.4.8
+Markdown==3.3.4
+sqlparse==0.4.1
+tqdm @ file:///tmp/build/80754af9/tqdm_1615925068909/work
+wincertstore==0.2

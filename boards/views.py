@@ -36,26 +36,26 @@ class BoardListView(ListView):
 # View function for topics per board
 
 
-def board_topics(request, pk):
-    board = get_object_or_404(Board, pk=pk)
-    # Create a field on the fly to access in the template as topic.replies
-    queryset = board.topics.order_by(
-        '-last_updated').annotate(replies=Count('posts') - 1)
-    # function based pagination
-    page = request.GET.get('page', 1)
-    paginator = Paginator(queryset, 20)
+# def board_topics(request, pk):
+#     board = get_object_or_404(Board, pk=pk)
+#     # Create a field on the fly to access in the template as topic.replies
+#     queryset = board.topics.order_by(
+#         '-last_updated').annotate(replies=Count('posts') - 1)
+#     # function based pagination
+#     page = request.GET.get('page', 1)
+#     paginator = Paginator(queryset, 20)
 
-    try:
-        topics = paginator.page(page)
-    except PageNotAnInteger:
-        # Fallback to the first page
-        topics = paginator.page(1)
-    except EmptyPage:
-        # User trys to enter a number that exceeds the range, so we fallback to last page
-        topics = paginator.page(paginator.num_pages)
+#     try:
+#         topics = paginator.page(page)
+#     except PageNotAnInteger:
+#         # Fallback to the first page
+#         topics = paginator.page(1)
+#     except EmptyPage:
+#         # User trys to enter a number that exceeds the range, so we fallback to last page
+#         topics = paginator.page(paginator.num_pages)
 
-    # Topics is now a paginator.Page instance instead of a queryset
-    return render(request, 'topics.html', {"board": board, 'topics': topics})
+#     # Topics is now a paginator.Page instance instead of a queryset
+#     return render(request, 'topics.html', {"board": board, 'topics': topics})
 
 # Paginatinon using the list view GCBV
 

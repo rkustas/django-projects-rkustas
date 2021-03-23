@@ -20,6 +20,7 @@
       type="text/css"
       href="{% static 'css/style.css' %}"
     />
+    <link rel="shortcut icon" type="image/png" href="{% static 'img/favicon.ico' %}"/>
   </head>
   <body>
     <div django-app="TaskManager">
@@ -101,15 +102,14 @@
                 <label for="{{ todo.id }}"
                   ><span class="complete-">{{ todo.title }}</span></label
                 >
-                <span class="priority-{{todo.priority}}"
+                <span class="priority-{{ todo.priority }}"
                   >{{ todo.get_priority_display }}</span
                 >
                 <span class="category-{{ todo.category }}"
                   >{{ todo.category }}</span
                 >
                 <strong class="taskDate"
-                  ><i class="fa fa-calendar"></i>{{ todo.createdAt }} - {{
-                  todo.due_date}}</strong
+                  ><i class="fa fa-calendar"></i>{{ todo.createdAt }} - {{ todo.due_date }}</strong
                 >
               </li>
               {% endfor %}

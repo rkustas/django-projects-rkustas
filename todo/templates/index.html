@@ -23,6 +23,17 @@
     <link rel="shortcut icon" type="image/png" href="{% static 'img/favicon.ico' %}"/>
   </head>
   <body>
+    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Todo App</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainMenu">
+          <div class="navbar-nav">
+            <a class="nav-item nav-link" href="{% url 'home' %}">Boards</a>
+          </div>
+        </div>
+    </nav>
     <div django-app="TaskManager">
       <div class="container">
         <div class="content">

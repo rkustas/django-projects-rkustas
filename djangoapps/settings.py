@@ -84,14 +84,14 @@ WSGI_APPLICATION = 'djangoapps.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'boards',
-        'USER': 'rkustas',
-        'PASSWORD': 'RyKu001!3990$'
-    },
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'boards',
+#         'USER': 'rkustas',
+#         'PASSWORD': 'RyKu001!3990$'
+#     },
+# }
 
 
 # Password validation

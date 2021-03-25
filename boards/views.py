@@ -5,13 +5,14 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.urls.base import reverse_lazy
-from django.views.generic import View, CreateView, UpdateView, ListView
+from django.views.generic import View, CreateView, UpdateView, ListView, DeleteView
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.urls import reverse, resolve
 
 # Class based views login_required decorator import
 from django.utils.decorators import method_decorator
+from django.views.generic.edit import DeleteView
 
 # Import models
 from .models import Board, Topic, Post
@@ -91,8 +92,8 @@ def new_topic(request, pk):
             topic.board = board
             topic.starter = request.user
             topic.save()
-            post = Post.objects.create(
-                message=form.cleaned_data.get('message'), topic=topic, created_by=user)
+            Post.objects.create(
+                message=form.cleaned_data.get('message'), topic=topic, created_by=request.user)
 
             # TODO redirect to the created topic once created
             return redirect('topic_posts', pk=pk, topic_pk=topic.pk)
@@ -222,3 +223,33 @@ class PostUpdateView(UpdateView):
         post.updated_at = timezone.now()
         post.save()
         return redirect('topic_posts', pk=post.topic.board.pk, topic_pk=post.topic.pk)
+
+# Class to delete a post
+@method_decorator(login_required, name="dispatch")
+class PostDeleteView(DeleteView):
+    model = Post
+    pk_url_kwarg = 'post_pk'
+
+        # Override get_queryset of class to make sure the user that posted can only delete the post
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        # Filter the queryset so only the logged in user which is available in the request can delete
+        return queryset.filter(created_by=self.request.user)
+
+    def get_success_url(self):
+        return reverse_lazy('topic_posts',kwargs={'pk': self.kwargs.get('pk'),'topic_pk': self.kwargs.get('topic_pk')})
+
+
+@method_decorator(login_required, name="dispatch")
+class TopicDeleteView(DeleteView):
+    model = Topic
+    pk_url_kwarg = 'topic_pk'
+
+        # Override get_queryset of class to make sure the user that posted can only delete the post
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        # Filter the queryset so only the logged in user which is available in the request can delete
+        return queryset.filter(starter=self.request.user)
+
+    def get_success_url(self):
+        return reverse_lazy('board_topics',kwargs={'pk': self.kwargs.get('pk')})

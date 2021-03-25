@@ -1,34 +1,31 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
-from django.urls import reverse
+from django.urls import resolve, reverse
+
+from ..forms import NewPostForm
 from ..models import Board, Post, Topic
 from ..views import reply_topic
 
 
 class ReplyTopicTestCase(TestCase):
-    # Base test case to be used in all view tests
-
+    '''
+    Base test case to be used in all `reply_topic` view tests
+    '''
     def setUp(self):
-        self.board = Board.objects.create(
-            name="Django", description="Django board.")
+        self.board = Board.objects.create(name='Django', description='Django board.')
         self.username = 'john'
         self.password = '123'
-        user = User.objects.create_user(
-            username=self.username, email="john@doe.com", password=self.password)
-        self.topic = Topic.objects.create(
-            subject="Hello world", board=self.board, starter=user)
-        Post.objects.create(message="Lorem ipsum dolor sit amet",
-                            topic=self.topic, created_by=user)
-        self.url = reverse('reply_topic', kwargs={
-                           'pk': self.board.pk, 'topic_pk': self.topic.pk})
+        user = User.objects.create_user(username=self.username, email='john@doe.com', password=self.password)
+        self.topic = Topic.objects.create(subject='Hello, world', board=self.board, starter=user)
+        Post.objects.create(message='Lorem ipsum dolor sit amet', topic=self.topic, created_by=user)
+        self.url = reverse('reply_topic', kwargs={'pk': self.board.pk, 'topic_pk': self.topic.pk})
 
 
 class LoginRequiredReplyTopicTests(ReplyTopicTestCase):
     def test_redirection(self):
         login_url = reverse('login')
         response = self.client.get(self.url)
-        self.assertRedirects(response, '{login_url}?next={url}'.format(
-            login_url=login_url, url=self.url))
+        self.assertRedirects(response, '{login_url}?next={url}'.format(login_url=login_url, url=self.url))
 
 
 class ReplyTopicTests(ReplyTopicTestCase):
@@ -49,7 +46,7 @@ class ReplyTopicTests(ReplyTopicTestCase):
 
     def test_contains_form(self):
         form = self.response.context.get('form')
-        self.assertIsInstance(form, PostForm)
+        self.assertIsInstance(form, NewPostForm)
 
     def test_form_inputs(self):
         # '''
@@ -63,15 +60,13 @@ class SuccessfulReplyTopicTests(ReplyTopicTestCase):
     def setUp(self):
         super().setUp()
         self.client.login(username=self.username, password=self.password)
-        self.response = self.client.post(
-            self.url, {'message': 'hello, world!'})
+        self.response = self.client.post(self.url, {'message': 'hello, world!'})
 
     def test_redirection(self):
         # '''
         # A valid form submission should redirect the user
         # '''
-        url = reverse('topic_posts', kwargs={
-                      'pk': self.board.pk, 'topic_pk': self.topic.pk})
+        url = reverse('topic_posts', kwargs={'pk': self.board.pk, 'topic_pk': self.topic.pk})
         topic_posts_url = '{url}?page=1#2'.format(url=url)
         self.assertRedirects(self.response, topic_posts_url)
 

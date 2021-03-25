@@ -1,59 +1,101 @@
 {% extends 'base.html' %}
-<!-- Resuse default value of block by calling super -->
-{% block title %}{{board.name}} - {{ block.super }} {% endblock %}
 
 {% load humanize %}
 
-<!-- Breadcrumb -->
-{% block breadcrumb %}
-<li class="breadcrumb-item">
-  <a href="{% url 'home' %}">Boards</a>
-</li>
-<li class="breadcrumb-item active">{{board.name}}</li>
+{% block title %}
+  {{ board.name }} - {{ block.super }}
 {% endblock %}
 
-<!-- Content -->
-{% block content %}
-<div class="mb-4">
-  <a href="{% url 'new_topic' board.pk %}" class="btn btn-primary">New Topic</a>
-</div>
-<table class="table table-striped mb-4">
-  <thead class="thead-inverse">
-    <th>Topic</th>
-    <th>Starter</th>
-    <th>Replies</th>
-    <th>Views</th>
-    <th>Last Update</th>
-  </thead>
-  <tbody>
-    {% for topic in topics %}
-    {% url 'topic_posts' board.pk topic.pk as topic_url %}
-    <tr>
-      <td>
-        <p class="mb-0">
-          <a href="{% url 'topic_posts' board.pk topic.pk %}">{{topic.subject}}</a
-        </p>
-        <br>
-        <small class="text-muted">
-          Pages:
-          {% for i in topic.get_page_range %}
-            <a href="{{topic_url}}?page={{i}}">{{i}}</a>
-          {% endfor %}
-          {% if topic.has_man_pages %}
-            <a href="{{topic_url}}?page={{topic.get_page_count}}">Last Page</a>
-          {% endif %}
-        </small>
-      </td>
-      <td class="align-middle">{{topic.starter.username}}</td>
-      <td class="align-middle">{{topic.replies}}</td>
-      <td class="align-middle">{{topic.views}}</td>
-      <td class="align-middle">{{topic.last_updated|naturaltime}}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+{% block breadcrumb %}
+  <li class="breadcrumb-item"><a href="{% url 'home' %}">Boards</a></li>
+  <li class="breadcrumb-item active">{{ board.name }}</li>
+{% endblock %}
 
-<!-- Pagination -->
-{% include 'includes/pagination.html' %}
+{% block content %}
+  <div class="mb-4">
+    <a href="{% url 'new_topic' board.pk %}" class="btn btn-primary">New Topic</a>
+  </div>
+
+  <table class="table table-striped mb-4">
+    <thead class="thead-inverse">
+      <tr>
+        <th>Topic</th>
+        <th>Starter</th>
+        <th>Replies</th>
+        <th>Views</th>
+        <th>Last Update</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for topic in topics %}
+        {% url 'topic_posts' board.pk topic.pk as topic_url %}
+        <tr>
+          <td>
+            <p class="mb-0">
+              <a href="{{ topic_url }}">{{ topic.subject }}</a>
+            </p>
+            <small class="text-muted">
+              Pages:
+              {% for i in topic.get_page_range %}
+                <a href="{{ topic_url }}?page={{ i }}">{{ i }}</a>
+              {% endfor %}
+              {% if topic.has_many_pages %}
+              ... <a href="{{ topic_url }}?page={{ topic.get_page_count }}">Last Page</a>
+              {% endif %}
+            </small>
+            {% if topic.starter.username == user.username %}
+            <span>
+              <a href="#"
+                 class="btn btn-primary btn-sm"
+                 role="button">Edit</a>
+            </span>
+            <span>
+              <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#fm-modal-grid">
+                Delete
+              </button>
+            </span>
+            <div class="modal fade" id="fm-modal-grid" tabindex="-1"
+            role="dialog" aria-labelledBy="fm-modal-grid"
+            aria-hidden="true">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                  <h5 class="modal-title">Topic Delete</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="container-fluid">
+                      <div class="row">
+                        <div class="col-12 col-sm-6">
+                          <p>Are you sure you want to delete the topic:</p>
+                          <span>{{topic.subject}}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <form action="{% url 'remove_topic' board.pk topic.pk %}" method="POST">
+                      {% csrf_token %}
+                      <button class="btn btn-primary btn-sm" data-dismiss="modal">Cancel</button>
+                      <button class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          </td>
+          <td class="align-middle">{{ topic.starter.username }}</td>
+          <td class="align-middle">{{ topic.replies }}</td>
+          <td class="align-middle">{{ topic.views }}</td>
+          <td class="align-middle">{{ topic.last_updated|naturaltime }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% include 'includes/pagination.html' %}
 
 {% endblock %}

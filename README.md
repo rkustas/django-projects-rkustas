@@ -2,5 +2,5 @@
 Assorted projects using Django
 
 
-*Full CRUD functionality
-*Todo list and Social Media like board posts and replies
+**1. Full CRUD functionality**
+**2. Todo list and Social Media like board posts and replies**

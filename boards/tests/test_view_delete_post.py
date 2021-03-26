@@ -1,13 +1,13 @@
-
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse, resolve
 from ..models import Board, Post, Topic
-from ..views import PostUpdateView
+from ..views import PostDeleteView
 from django.forms import ModelForm
 
 
-class PostUpdateViewTestCase(TestCase):
+
+class PostDeleteViewTestCase(TestCase):
     # Base test to be used in all subsequent tests
     def setUp(self):
         self.board = Board.objects.create(
@@ -20,14 +20,13 @@ class PostUpdateViewTestCase(TestCase):
             subject='Hello, world', board=self.board, starter=user)
         self.post = Post.objects.create(
             message="Lorem ipsum dolor sit amet", topic=self.topic, created_by=user)
-        self.url = reverse('edit_post', kwargs={
+        self.url = reverse('remove_post', kwargs={
             'pk': self.board.pk,
             'topic_pk': self.topic.pk,
             'post_pk': self.post.pk
         })
 
-
-class LoginRequiredPostUpdateViewTests(PostUpdateViewTestCase):
+class LoginRequiredPostDeleteViewTests(PostDeleteViewTestCase):
     def test_redirection(self):
         # Test if only logged in users can edit posts
         login_url = reverse('login')
@@ -36,7 +35,7 @@ class LoginRequiredPostUpdateViewTests(PostUpdateViewTestCase):
             login_url=login_url, url=self.url))
 
 
-class UnauthorizedPostUpdateViewTests(PostUpdateViewTestCase):
+class UnauthorizedPostDeleteViewTests(PostDeleteViewTestCase):
     def setUp(self):
         # Create a new user different from the one that posted
         super().setUp()
@@ -52,40 +51,25 @@ class UnauthorizedPostUpdateViewTests(PostUpdateViewTestCase):
         self.assertEquals(self.response.status_code, 404)
 
 
-class PostUpdateViewTests(PostUpdateViewTestCase):
+class PostDeleteViewTests(PostDeleteViewTestCase):
     def setUp(self):
         super().setUp()
         self.client.login(username=self.username, password=self.password)
-        self.response = self.client.get(self.url)
+        self.response = self.client.delete(self.url)
 
     def test_status_code(self):
-        self.assertEquals(self.response.status_code, 200)
+        self.assertEquals(self.response.status_code, 302)
 
     def test_view_class(self):
-        view = resolve('/boards/1/topics/1/posts/1/edit/')
-        self.assertEquals(view.func.view_class, PostUpdateView)
-
-    def test_csrf(self):
-        self.assertContains(self.response, 'csrfmiddlewaretoken')
-
-    def test_contains_form(self):
-        form = self.response.context.get('form')
-        self.assertIsInstance(form, ModelForm)
-
-    def test_form_inputs(self):
-        # '''
-        # The view must contain two inputs: csrf, message textarea
-        # '''
-        self.assertContains(self.response, '<input', 1)
-        self.assertContains(self.response, '<textarea', 1)
+        view = resolve('/boards/1/topics/1/posts/1/remove/')
+        self.assertEquals(view.func.view_class, PostDeleteView)
 
 
-class SuccessfulPostUpdateViewTests(PostUpdateViewTestCase):
+class SuccessfulPostDeleteViewTests(PostDeleteViewTestCase):
     def setUp(self):
         super().setUp()
         self.client.login(username=self.username, password=self.password)
-        self.response = self.client.post(
-            self.url, {'message': 'edited message'})
+        self.response = self.client.delete(self.url)
 
     def test_redirection(self):
         # '''
@@ -95,26 +79,10 @@ class SuccessfulPostUpdateViewTests(PostUpdateViewTestCase):
                                   'pk': self.board.pk, 'topic_pk': self.topic.pk})
         self.assertRedirects(self.response, topic_posts_url)
 
-    def test_post_changed(self):
-        self.post.refresh_from_db()
-        self.assertEquals(self.post.message, 'edited message')
+    def test_post_deleted_response(self):
+        self.response = self.client.get(self.url)
+        self.assertEquals(self.response.status_code, 404)
 
-
-class InvalidPostUpdateViewTests(PostUpdateViewTestCase):
-    def setUp(self):
-        # '''
-        # Submit an empty dictionary to the `reply_topic` view
-        # '''
-        super().setUp()
-        self.client.login(username=self.username, password=self.password)
-        self.response = self.client.post(self.url, {})
-
-    def test_status_code(self):
-        # '''
-        # An invalid form submission should return to the same page
-        # '''
-        self.assertEquals(self.response.status_code, 200)
-
-    def test_form_errors(self):
-        form = self.response.context.get('form')
-        self.assertTrue(form.errors)
+    def test_post_deleted(self):
+        self.assertFalse(Post.objects.filter(pk=self.post.pk).exists())
+    

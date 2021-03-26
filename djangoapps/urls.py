@@ -18,7 +18,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import include, path
 from django.conf.urls import url
 from todo.views import index
-from boards.views import new_topic, reply_topic, new_post, NewPostView, PostUpdateView, BoardListView, TopicListView, PostsListView
+from boards.views import new_topic, reply_topic, new_post, NewPostView, PostUpdateView, BoardListView, TopicListView, PostsListView, PostDeleteView, TopicDeleteView
 from accounts.views import signup, UserUpdateView
 
 urlpatterns = [
@@ -57,6 +57,7 @@ urlpatterns = [
         name='password_change_done'),
     url(r'^boards/(?P<pk>\d+)/topics/(?P<topic_pk>\d+)/$',
         PostsListView.as_view(), name='topic_posts'),
+    url(r'^boards/(?P<pk>\d+)/topics/(?P<topic_pk>\d+)/remove/$', TopicDeleteView.as_view(), name='remove_topic'),
     url(r'^boards/(?P<pk>\d+)/topics/(?P<topic_pk>\d+)/reply/$',
         reply_topic, name='reply_topic'),
     url(r'^new_post/$', new_post, name='new_post'),
@@ -66,7 +67,8 @@ urlpatterns = [
     # url(r'^new_post/$', NewPostView.as_view(), name='new_post'),
     url(r'^boards/(?P<pk>\d+)/topics/(?P<topic_pk>\d+)/posts/(?P<post_pk>\d+)/edit/$',
         PostUpdateView.as_view(), name='edit_post'),
-
+    url(r'^boards/(?P<pk>\d+)/topics/(?P<topic_pk>\d+)/posts/(?P<post_pk>\d+)/remove/$',
+        PostDeleteView.as_view(), name='remove_post'),
     url(r'^settings/account/$', UserUpdateView.as_view(), name='my_account'),
 
 

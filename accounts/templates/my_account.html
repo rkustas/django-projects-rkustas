@@ -15,9 +15,10 @@
 {% block content %}
 <div class="row">
   <div class="col-lg-6 col-md-8 col-sm-10">
-    <form novalidate method="post">
+    <small>In order to add a picture to your account visit <a href="https://en.gravatar.com/">Gravatar</a> and register with the same email that you used here.  It's free!</small>
+    <form novalidate method="post" class="mt-3">
       {% csrf_token %} {% include 'includes/form.html' %}
-      <button class="btn btn-success">Save changes</button>
+      <button class="btn btn-success mt-2">Save changes</button>
     </form>
   </div>
 </div>
